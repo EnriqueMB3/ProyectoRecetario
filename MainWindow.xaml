@@ -1,0 +1,349 @@
+﻿<Window x:Class="ProyectoRecetario.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProyectoRecetario"
+        mc:Ignorable="d"
+        Title="Recetario" Closed="Window_Closed" 
+        Name="Window" Height="840" Width="1200" Loaded="Window_Loaded" 
+        WindowStartupLocation="CenterScreen"
+        MinWidth="1200" MinHeight="840">
+
+    <Window.Resources>
+        <local:ConverterStringToImage x:Key="entrada"></local:ConverterStringToImage>
+            <Style TargetType="ListBoxItem">
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Gray"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Blue"/>
+            </Style.Resources>
+            <Setter Property="ListBoxItem.Background" Value="#ffff"/>
+        </Style>
+        <ControlTemplate x:Key="TextBoxBaseControlTemplate" TargetType="{x:Type TextBoxBase}">
+            <Border Background="{TemplateBinding Background}" 
+                x:Name="Bd" 
+                CornerRadius="15">
+                <ScrollViewer x:Name="PART_ContentHost"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" TargetName="Bd"/>
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="Width" Value="auto">
+                    <Setter Property="MinWidth" Value="200"/>
+                </Trigger>
+                <Trigger Property="Height" Value="auto">
+                    <Setter Property="MinHeight" Value="20"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" Background="#201f00">
+           
+            <Grid.RowDefinitions>
+                <RowDefinition MinHeight="50" Height="70"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition MinHeight="50" Height="50"/>
+            </Grid.RowDefinitions>
+            <UniformGrid Columns="1" Rows="1">
+            <TextBox GotFocus="textBuscador_GotFocus" Padding="10 4 2 4" Text="Buscar" Template="{StaticResource TextBoxBaseControlTemplate}" 
+                     Name="textBuscador" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                     Margin="10" Height="30" Width="380"
+                     Foreground="Gray" FontSize="15" LostFocus="textBuscador_LostFocus" 
+                     Keyboard.GotKeyboardFocus="textBuscador_GotKeyboardFocus"
+                     Keyboard.LostKeyboardFocus="textBuscador_LostKeyboardFocus"
+                     KeyDown="textBuscador_KeyDown">
+            </TextBox>
+            </UniformGrid>
+
+            <ListBox  BorderBrush="#353535" BorderThickness="0 1 0 1" 
+                      Background="Transparent" Name="lstRecetas" Grid.Row="1" 
+                      ItemContainerStyle="{DynamicResource ListBoxItemStyle1}" >
+                <ListBox.ItemTemplate >
+                    <DataTemplate>
+                        <local:TreeViewRecetas></local:TreeViewRecetas>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.Resources>
+                    <Style x:Key="ListBoxItemStyle1" TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+                        <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+                        <Setter Property="Padding" Value="2,0,0,0"/>
+                        <Setter Property="Foreground" Value="{Binding Path=Metdo}"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="true">
+                                            <!-- FONDO color rojo para los items seleccionados -->
+                                            <Setter Property="Background" TargetName="Bd" Value="#353535"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="true"/>
+                                                <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                                            </MultiTrigger.Conditions>
+                                            <!-- FONDO color para los items seleccionados cuando se pierde el foco -->
+                                            <Setter Property="Background" TargetName="Bd" Value="#353535"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </MultiTrigger>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                </ListBox.Resources>
+            </ListBox>
+            <UniformGrid Grid.Row="2" Columns="3">
+                
+                <Button Width="50" Cursor="Hand" BorderThickness="0" Background="Transparent" Name="btnEliminar" Click="btnEliminar_Click" >
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border x:Name="bdr_main"  Margin="2" BorderThickness="1"  Background="Transparent">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="4" ContentSource="Content" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    
+                    <Image  Name="imgCancelar"  Height="30">
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="Graycancel-button.png"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Source" Value="cancel-button.png"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                </Button>
+                <Button Width="50" Cursor="Hand" BorderThickness="0" Background="Transparent" Name="btnEditar"  Click="Editar_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border x:Name="bdr_main" CornerRadius="20"  Background="Transparent">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2" ContentSource="Content" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Image Name="imgEditar"  Height="30">
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="Grayedit.png"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Source" Value="edit.png"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </Button>
+                <Button Width="50" BorderThickness="0" Background="Transparent" Cursor="Hand" Name="btnExpandir" Click="btnExpandir_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border x:Name="bdr_main"  Margin="2"   Background="Transparent">
+                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,6,8,6" ContentSource="Content" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Image Name="imgAdd"  Height="30">
+                        <Image.Style>
+                            <Style TargetType="{x:Type Image}">
+                                <Setter Property="Source" Value="Grayplus-button.png"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Source" Value="plus.png"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </Button>
+            </UniformGrid>
+        </Grid>
+
+        <Expander MaxWidth="350" DockPanel.Dock="Right" Grid.Column="2" ExpandDirection="Left" Name="expAdd">
+            <StackPanel Name="expModuloAgregar" >
+                <TextBlock Grid.Row="0" Margin="5 10 1 5" Foreground="#ffad33">Nombre :</TextBlock>
+                <TextBox Width="300" Padding="8 5 5 5" Grid.Row="1" Name="txtNombre" Height="25" Template="{StaticResource TextBoxBaseControlTemplate}" Margin="2" Foreground="Black" Background="WhiteSmoke"></TextBox>
+                <TextBlock Grid.Row="2" Margin="5" Foreground="#ffad33">Categoria :</TextBlock>
+                <!--<TextBox Grid.Row="3" Name="txtCategoria" Height="20" Template="{StaticResource TextBoxBaseControlTemplate}" Margin="2"  Background="WhiteSmoke" Foreground="Black" ></TextBox>-->
+                <ComboBox Width="300" Margin="5" Name="cmbCategoria"></ComboBox>
+                <TextBlock  Name="txtTime" Grid.Row="2" Margin="5" Foreground="#ffad33">Tiempo de Preparación :</TextBlock>
+                <TextBox Width="300" Padding="8 5 5 5" Grid.Row="5"   Height="25"  Template="{StaticResource TextBoxBaseControlTemplate}" Margin="2"  Foreground="Black" Background="WhiteSmoke" Name="txtTimes" ></TextBox>
+                <TextBlock Grid.Row="4" Margin="5"  Foreground="#ffad33">Ingredientes :</TextBlock>
+                <TextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Width="300" Padding="8 5 5 5" AcceptsReturn="True" Grid.Row="5"  Name="txtIngredientes" Height="100"  Template="{StaticResource TextBoxBaseControlTemplate}" Margin="2"  Foreground="Black" Background="WhiteSmoke" ></TextBox>
+                <TextBlock  Width="300" Grid.Row="6" Margin="5"  Foreground="#ffad33">Modo de preparación :</TextBlock>
+                <TextBox  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="150" Width="300" Grid.Row="7" Name="txtModo" TextWrapping="Wrap" AcceptsReturn="True" Template="{StaticResource TextBoxBaseControlTemplate}" Margin="2" Foreground="Black" Background="WhiteSmoke" Padding="8 5 5 5"></TextBox>
+                <TextBlock Grid.Row="6" Margin="5"  Foreground="#ffad33">Foto :</TextBlock>
+                <Grid Height="auto" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Image Margin="12" Height="200" Name="imgPhoto" StretchDirection="Both" Stretch="Uniform" />
+                    <Button Cursor="Hand" Grid.Column="2" Name="AgregarImagen" Click="AgregarImagen_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Border x:Name="bdr_main"  Margin="2" BorderThickness="1"  Background="Transparent">
+                                    <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="4" ContentSource="Content" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+
+                        <Image    Height="40">
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Setter Property="Source" Value="add-song.png"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Source" Value="Darkadd-song.png"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </Button>
+
+                </Grid>
+                <UniformGrid>
+                    <Button Cursor="Hand" Background="#ffad33" BorderThickness="0" Width="300" Foreground="WhiteSmoke" Height="30" Margin="10 1 1 5" Click="Agregar_Click">Add</Button>
+                </UniformGrid>
+            </StackPanel>
+        </Expander>
+        <Grid Grid.Column="1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="4*"/>
+            </Grid.RowDefinitions>
+            <TextBlock  Text="{Binding ElementName=lstRecetas, Path=SelectedItem.Nombre}" Grid.ColumnSpan="3" 
+                        HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" Name="txtNombreHeader" FontSize="35" Foreground="#505050"></TextBlock>
+            <Image Grid.Column="1" Grid.Row="1" Margin="9" Name="ImgReceta" Source="{Binding ElementName=lstRecetas, Path=SelectedItem.Foto, Converter={StaticResource entrada}}">
+            </Image>
+            <TextBlock  Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Center"
+                   Margin="10" FontSize="16"></TextBlock>
+            <Button Height="50" Cursor="Hand" Grid.Row="1" Background="Transparent" BorderThickness="0" Name="btnAtras" Click="btnAtras_Click" >
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="bdr_main"  Margin="2" BorderThickness="0"  Background="Transparent">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0" ContentSource="Content" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+                <Image    Height="40">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Setter Property="Source" Value="back-arrow-circular-symbol.png"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Source" Value="Blackback-arrow-circular-symbol.png"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </Button>
+            <Button Grid.Column="2" Grid.Row="1" Background="Transparent" BorderThickness="0" 
+                    Name="btnAdelande" Click="btnAdelande_Click" Cursor="Hand" Height="50">
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="bdr_main"   BorderThickness="1"  Background="Transparent">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="4" ContentSource="Content" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bdr_main" Property="Background" Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+
+                <Image    Height="40">
+                    <Image.Style>
+                        <Style TargetType="{x:Type Image}">
+                            <Setter Property="Source" Value="right-arrow-circular-button.png"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Source" Value="Blackight-arrow-circular-button.png"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+            </Button>
+            <DockPanel Grid.Row="2" Grid.ColumnSpan="3">
+                <TextBlock  FontSize="16" DockPanel.Dock="Top" Margin="5" Name="TxtCategory" Text="{Binding ElementName=lstRecetas,Path=SelectedItem.Tipo}" ></TextBlock>
+                <TextBlock FontSize="16" DockPanel.Dock="Top" Margin="5" Name="txtTiempo" Text="{Binding ElementName=lstRecetas,Path=SelectedItem.Tiempo}" ></TextBlock>
+                <TextBox FontSize="16" IsReadOnly="True" Background="White" Template="{StaticResource TextBoxBaseControlTemplate}" Text="{Binding ElementName=lstRecetas, Path=SelectedItem.ModoPreparaciom}" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                          Foreground="Black" Margin="5" TextWrapping="WrapWithOverflow" Name="txbPreparacion" Height="200"></TextBox>
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Window>
